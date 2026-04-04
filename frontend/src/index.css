@@ -1,0 +1,22 @@
+/* Sabhi elements ko border ke andar rakhne ke liye */
+* {
+  box-sizing: border-box;
+  max-width: 100vw; 
+}
+
+/* Body ko screen ke size ka fix karna */
+body, html, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden; /* Screen ko daaye-baaye hilne se rokta hai */
+}
+
+/* Mobile ke liye universal adjustment */
+@media (max-width: 768px) {
+  /* Agar tumne kisi box ko 500px ya 600px jaisi fixed width di hai, toh usko hata dega */
+  div {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
