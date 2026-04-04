@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import './index.css'; // Ye line zaroori hai CSS link karne ke liye
 
 function App() {
   const [expenses, setExpenses] = useState([]);
@@ -77,17 +78,17 @@ function App() {
         💰 MERA DHASU TRACKER
       </h1>
 
-      <div style={{ display: 'flex', gap: '30px', maxWidth: '1200px', margin: '0 auto', flexWrap: 'wrap', alignItems: 'flex-start' }}>
+      {/* Main Container */}
+      <div className="main-container" style={{ display: 'flex', gap: '30px', maxWidth: '1200px', margin: '0 auto', flexWrap: 'wrap', alignItems: 'flex-start' }}>
         
-        {/* LEFT PANEL: Total, Form & Chart */}
-        <div style={{ flex: '1', minWidth: '350px', display: 'flex', flexDirection: 'column', gap: '25px' }}>
+        {/* LEFT PANEL */}
+        <div className="left-panel" style={{ flex: '1', display: 'flex', flexDirection: 'column', gap: '25px' }}>
           
           <div style={{ background: 'linear-gradient(135deg, #e14eca 0%, #ba54f5 100%)', padding: '30px', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.3)', textAlign: 'center' }}>
             <p style={{ margin: '0 0 10px 0', fontSize: '16px', opacity: '0.9', textTransform: 'uppercase', letterSpacing: '1px' }}>Total Kharcha</p>
             <h2 style={{ margin: 0, fontSize: '42px' }}>₹{totalKharcha}</h2>
           </div>
 
-          {/* 🔥 FORM KO UPAR SHIFT KIYA HAI */}
           <div style={{ background: '#27293d', padding: '25px', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.2)' }}>
             <h3 style={{ marginTop: 0, borderBottom: '1px solid #3b3d54', paddingBottom: '15px', color: '#e14eca', fontSize: '20px' }}>
               {editId ? '✏️ Kharcha Update Karein' : '➕ Naya Kharcha Jodein'}
@@ -110,11 +111,9 @@ function App() {
             </form>
           </div>
 
-          {/* 🔥 PIE CHART KO NICHE SHIFT KIYA HAI */}
           {expenses.length > 0 && (
             <div style={{ background: '#27293d', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.2)', height: '320px', display: 'flex', flexDirection: 'column' }}>
               <h3 style={{ marginTop: 0, textAlign: 'center', color: '#fff', fontSize: '16px', marginBottom: '10px' }}>Kharcha by Category</h3>
-              
               <div style={{ flex: 1, width: '100%', minHeight: 0 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -132,12 +131,11 @@ function App() {
           )}
         </div>
 
-        {/* RIGHT PANEL: List */}
-        <div style={{ flex: '1.5', minWidth: '400px', background: '#27293d', padding: '25px', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.2)' }}>
+        {/* RIGHT PANEL */}
+        <div className="right-panel" style={{ flex: '1.5', background: '#27293d', padding: '25px', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.2)' }}>
           <h3 style={{ marginTop: 0, borderBottom: '1px solid #3b3d54', paddingBottom: '15px', color: '#00f2c3', fontSize: '20px' }}>
             📋 Kharche ki List
           </h3>
-          
           <div style={{ maxHeight: '750px', overflowY: 'auto', paddingRight: '5px', marginTop: '20px' }}>
             {expenses.length === 0 ? (
               <p style={{ textAlign: 'center', color: '#9a9afb', marginTop: '50px', fontSize: '16px' }}>Abhi tak koi kharcha nahi laya gaya...</p>
@@ -149,11 +147,10 @@ function App() {
                       <strong style={{ fontSize: '18px', color: '#fff', letterSpacing: '0.5px' }}>{expense.title}</strong> <br/>
                       <small style={{ color: '#9a9afb', fontSize: '13px', display: 'inline-block', marginTop: '5px' }}>{expense.category} | {expense.date.substring(0, 10)}</small>
                     </div>
-                    
                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                       <span style={{ fontSize: '22px', fontWeight: 'bold', color: '#00f2c3' }}>₹{expense.amount}</span>
-                      <button onClick={() => handleEdit(expense)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '20px', padding: '5px', transition: 'transform 0.2s' }} title="Edit">✏️</button>
-                      <button onClick={() => handleDelete(expense.id)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '20px', padding: '5px' }} title="Delete">❌</button>
+                      <button onClick={() => handleEdit(expense)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '20px', padding: '5px' }}>✏️</button>
+                      <button onClick={() => handleDelete(expense.id)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '20px', padding: '5px' }}>❌</button>
                     </div>
                   </li>
                 ))}
@@ -161,6 +158,7 @@ function App() {
             )}
           </div>
         </div>
+
       </div>
     </div>
   );
