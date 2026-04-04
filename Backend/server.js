@@ -11,6 +11,7 @@
 // app.listen(port, () => {
 //     console.log(`Server mast chal raha hai: http://localhost:${port} par`);
 // });
+require('dotenv').config();
 const express = require('express');
 const mysql = require('mysql2'); // Database se baat karne wala tool
 const cors = require('cors');    // Frontend ko access dene wala tool
@@ -23,11 +24,24 @@ app.use(cors());
 app.use(express.json()); 
 
 // Database (XAMPP MySQL) se connection ka setup
+// const db = mysql.createConnection({
+//     host: 'localhost',
+//     user: 'root',      // XAMPP me default user hamesha 'root' hota hai
+//     password: '',      // XAMPP me default password khali (blank) hota hai
+//     database: 'expense_tracker' // Hamare database ka naam
+// });
+
+
+// Cloud Database se secure connection
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',      // XAMPP me default user hamesha 'root' hota hai
-    password: '',      // XAMPP me default password khali (blank) hota hai
-    database: 'expense_tracker' // Hamare database ka naam
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT,
+    database: process.env.DB_NAME,
+    ssl: {
+        rejectUnauthorized: true // Cloud db ke liye ye zaroori hota hai
+    }
 });
 
 // Database se judne (connect) ki koshish
@@ -96,21 +110,50 @@ app.put('/expenses/:id', (req, res) => {
 });
 
 // Server ko wapas start karna
-app.listen(port, () => {
+// app.listen(port, () => {
     
-    // Saare expenses dekhne ke liye API (GET Route)
-    app.get('/expenses', (req, res) => {
-        // Database se sab kuch select karne ki SQL query
-        const sqlQuery = "SELECT * FROM expenses";
+//     // Saare expenses dekhne ke liye API (GET Route)
+//     app.get('/expenses', (req, res) => {
+//         // Database se sab kuch select karne ki SQL query
+//         const sqlQuery = "SELECT * FROM expenses";
 
-        db.query(sqlQuery, (err, results) => {
-            if (err) {
-                console.error("Data laane mein gadbad hui:", err);
-                return res.status(500).json({ error: "Database error" });
-            }
-            res.json(results); // Ye database se mile data ko bhej dega
-        });
+//         db.query(sqlQuery, (err, results) => {
+//             if (err) {
+//                 console.error("Data laane mein gadbad hui:", err);
+//                 return res.status(500).json({ error: "Database error" });
+//             }
+//             res.json(results); // Ye database se mile data ko bhej dega
+//         });
+//     });
+
+//     console.log(`Server mast chal raha hai: http://localhost:${port} par 🚀`);
+// });
+
+// ==========================================
+// 🛣️ SAARE API ROUTES YAHAN HONGE
+// ==========================================
+
+// Saare expenses dekhne ke liye API (GET Route)
+app.get('/expenses', (req, res) => {
+    const sqlQuery = "SELECT * FROM expenses";
+    
+    db.query(sqlQuery, (err, results) => {
+        if (err) {
+            console.error("Data laane mein gadbad hui:", err);
+            return res.status(500).json({ error: "Database error" });
+        }
+        res.json(results); // Ye database se mile data ko bhej dega
     });
+});
 
-    console.log(`Server mast chal raha hai: http://localhost:${port} par 🚀`);
+// (Agar tumhare POST, PUT, DELETE wale routes hain, toh wo yahan hone chahiye)
+
+
+// ==========================================
+// 🚀 SERVER START KARNE KA CODE (SABSE NICHE)
+// ==========================================
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log(`Server mast chal raha hai port ${PORT} par 🚀`);
 });
