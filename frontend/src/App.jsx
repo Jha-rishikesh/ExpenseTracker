@@ -11,7 +11,7 @@ function App() {
   const [editId, setEditId] = useState(null); 
 
   const fetchExpenses = () => {
-    fetch('http://localhost:3000/expenses')
+    fetch('https://expensetracker-ey6p.onrender.com/expenses')
       .then(response => response.json())
       .then(data => setExpenses(data))
       .catch(error => console.error("Error:", error));
@@ -26,13 +26,13 @@ function App() {
     const expenseData = { title, amount, category, date };
 
     if (editId === null) {
-      fetch('http://localhost:3000/expenses', {
+      fetch('https://expensetracker-ey6p.onrender.com/expenses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(expenseData)
       }).then(() => resetFormAndFetch());
     } else {
-      fetch(`http://localhost:3000/expenses/${editId}`, {
+      fetch(`https://expensetracker-ey6p.onrender.com/expenses/${editId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(expenseData)
@@ -46,7 +46,7 @@ function App() {
   };
 
   const handleDelete = (id) => {
-    fetch(`http://localhost:3000/expenses/${id}`, { method: 'DELETE' })
+    fetch(`https://expensetracker-ey6p.onrender.com/expenses/${id}`, { method: 'DELETE' })
     .then(() => fetchExpenses());
   };
 
