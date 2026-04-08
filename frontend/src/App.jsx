@@ -1,73 +1,91 @@
-import { useState, useEffect } from 'react';
-import { ToastContainer, toast } from 'react-toastify';
+import { useState, useEffect, useContext } from 'react';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ExpenseForm from './components/ExpenseForm';
 import ExpenseList from './components/ExpenseList';
 import ExpenseChart from './components/ExpenseChart';
+import Authentication from './components/Authentication';
+import { useExpenses } from './hooks/useExpenses';
+import { AuthContext } from './context/AuthContext';
 import './index.css';
 
 function App() {
-  const [expenses, setExpenses] = useState([]);
+  const { user, token, logout, isLoading: isAuthLoading } = useContext(AuthContext);
+  const { expenses, isLoading: isExpensesLoading, fetchExpenses, deleteExpense } = useExpenses();
   const [editData, setEditData] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const fetchExpenses = () => {
-    setIsLoading(true);
-    const apiUrl = `${import.meta.env.VITE_API_URL}/expenses`;
-    
-    fetch(apiUrl)
-      .then(response => {
-        if (!response.ok) throw new Error('API request failed');
-        return response.json();
-      })
-      .then(data => setExpenses(data))
-      .catch(error => {
-        console.error("Error:", error);
-        toast.error('Data lane me gadbad hui!');
-      })
-      .finally(() => setIsLoading(false));
-  };
+  const [monthlyLimit, setMonthlyLimit] = useState(Number(localStorage.getItem('monthlyLimit')) || 50000);
 
   useEffect(() => {
-    fetchExpenses();
-  }, []);
+    if (token) {
+      fetchExpenses();
+    }
+  }, [fetchExpenses, token]);
 
-  const handleDelete = (id) => {
-    const apiUrl = `${import.meta.env.VITE_API_URL}/expenses/${id}`;
-    
-    fetch(apiUrl, { method: 'DELETE' })
-      .then(res => {
-         if (!res.ok) throw new Error('Failed to delete');
-         return res.json();
-      })
-      .then(() => {
-        toast.success("Kharcha hamesha ke liye delete ho gaya! 🗑️");
-        fetchExpenses();
-      })
-      .catch((err) => {
-        console.error(err);
-        toast.error("Delete karne me dikkat aayi!");
-      });
+  if (isAuthLoading) {
+    return <div className="min-h-screen flex items-center justify-center bg-[#1e1e2f] text-white">Loading...</div>;
+  }
+
+  if (!token) {
+    return (
+      <>
+        <ToastContainer theme="dark" position="top-right" autoClose={3000} />
+        <Authentication />
+      </>
+    );
+  }
+
+  const handleUpdateLimit = () => {
+    const newLimit = window.prompt("Apna naya Monthly Budget type karo (e.g. 60000):", monthlyLimit);
+    if (newLimit && !isNaN(newLimit) && Number(newLimit) > 0) {
+       setMonthlyLimit(Number(newLimit));
+       localStorage.setItem('monthlyLimit', newLimit);
+    }
   };
 
   const totalKharcha = expenses.reduce((total, item) => total + Number(item.amount), 0);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#1e1e2f', color: '#fff', padding: '40px 20px', fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif' }}>
+    <div className="min-h-screen bg-[#1e1e2f] text-white p-6 md:p-10 font-sans">
       <ToastContainer theme="dark" position="top-right" autoClose={3000} />
       
-      <h1 style={{ textAlign: 'center', color: '#fff', marginBottom: '40px', letterSpacing: '2px', fontWeight: 'bold' }}>
-        💰 MERA DHASU TRACKER
-      </h1>
+      <div className="flex justify-between items-center mb-10 max-w-7xl mx-auto">
+        <h1 className="text-white tracking-widest font-bold text-2xl md:text-4xl m-0">
+          💰 MERA DHASU TRACKER
+        </h1>
+        <div className="flex items-center gap-4">
+          <span className="text-[#00f2c3] hidden md:inline">Welcome, {user?.username}</span>
+          <button onClick={logout} className="bg-[#fd5d93] px-4 py-2 rounded shadow hover:bg-red-500 transition font-bold cursor-pointer">
+            Logout
+          </button>
+        </div>
+      </div>
 
-      <div className="main-container" style={{ display: 'flex', gap: '30px', maxWidth: '1200px', margin: '0 auto', flexWrap: 'wrap', alignItems: 'flex-start' }}>
+      <div className="flex flex-col md:flex-row gap-8 max-w-7xl mx-auto items-start">
         
         {/* LEFT PANEL */}
-        <div className="left-panel" style={{ flex: '1', display: 'flex', flexDirection: 'column', gap: '25px' }}>
+        <div className="flex-1 flex flex-col gap-6 w-full">
           
-          <div style={{ background: 'linear-gradient(135deg, #e14eca 0%, #ba54f5 100%)', padding: '30px', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.3)', textAlign: 'center' }}>
-            <p style={{ margin: '0 0 10px 0', fontSize: '16px', opacity: '0.9', textTransform: 'uppercase', letterSpacing: '1px' }}>Total Kharcha</p>
-            <h2 style={{ margin: 0, fontSize: '42px' }}>₹{totalKharcha}</h2>
+          <div className="bg-gradient-to-br from-[#e14eca] to-[#ba54f5] p-8 rounded-xl shadow-lg relative overflow-hidden group">
+            <p className="m-0 mb-2 text-base opacity-90 uppercase tracking-wider text-center">Total Kharcha</p>
+            <h2 className="m-0 text-5xl font-bold text-center">₹{totalKharcha}</h2>
+            
+            {/* Budget Progress */}
+            <div className="mt-6 bg-black/20 rounded-full h-3 w-full overflow-hidden">
+               <div 
+                 className={`h-full rounded-full transition-all duration-500 ${totalKharcha > monthlyLimit ? 'bg-red-500' : 'bg-[#00f2c3]'}`} 
+                 style={{ width: `${Math.min((totalKharcha / monthlyLimit) * 100, 100)}%` }} 
+               />
+            </div>
+            <p className="text-sm mt-2 text-center opacity-80 flex justify-center items-center gap-2">
+               Monthly Limit: ₹{monthlyLimit} 
+               <button onClick={handleUpdateLimit} className="text-[#00f2c3] hover:text-white cursor-pointer" title="Update Limit">✏️</button>
+            </p>
+            
+            {totalKharcha > monthlyLimit && (
+              <div className="absolute top-0 left-0 w-full p-1 bg-red-600 text-white text-xs text-center font-bold animate-pulse">
+                BUDGET EXCEEDED! 🚨
+              </div>
+            )}
           </div>
 
           <ExpenseForm 
@@ -83,8 +101,8 @@ function App() {
         <ExpenseList 
            expenses={expenses} 
            onEdit={(expense) => setEditData(expense)} 
-           onDelete={handleDelete} 
-           isLoading={isLoading}
+           onDelete={deleteExpense} 
+           isLoading={isExpensesLoading}
         />
 
       </div>

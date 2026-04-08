@@ -16,17 +16,20 @@ const ExpenseChart = ({ expenses }) => {
   const COLORS = ['#00f2c3', '#1d8cf8', '#ff8d72', '#fd5d93', '#ffc107', '#bc8f8f', '#6495ed'];
 
   return (
-    <div style={{ background: '#27293d', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.2)', height: '320px', display: 'flex', flexDirection: 'column' }}>
-      <h3 style={{ marginTop: 0, textAlign: 'center', color: '#fff', fontSize: '16px', marginBottom: '10px' }}>Kharcha by Category</h3>
-      <div style={{ flex: 1, width: '100%', minHeight: 0 }}>
+    <div className="bg-[#27293d] p-5 rounded-xl shadow-lg h-[320px] flex flex-col">
+      <h3 className="mt-0 text-center text-white text-base mb-2.5 font-semibold tracking-wide">Kharcha by Category</h3>
+      <div className="flex-1 w-full min-h-0">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
-            <Pie data={chartData} cx="50%" cy="45%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+            <Pie data={chartData} cx="50%" cy="45%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value" stroke="none">
               {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip formatter={(value) => `₹${value}`} />
+            <Tooltip 
+              formatter={(value) => `₹${value}`} 
+              contentStyle={{ backgroundColor: '#1e1e2f', border: 'none', borderRadius: '8px', color: '#fff' }} 
+            />
             <Legend verticalAlign="bottom" align="center" iconType="circle" wrapperStyle={{ paddingTop: '10px' }} />
           </PieChart>
         </ResponsiveContainer>

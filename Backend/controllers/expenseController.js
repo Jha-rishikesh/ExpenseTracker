@@ -2,9 +2,10 @@ const db = require('../config/db');
 
 // Saare expenses dekhne ke liye API (GET)
 exports.getExpenses = (req, res) => {
-    const sqlQuery = "SELECT * FROM expenses ORDER BY date DESC";
+    const userId = req.user.id;
+    const sqlQuery = "SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC";
     
-    db.query(sqlQuery, (err, results) => {
+    db.query(sqlQuery, [userId], (err, results) => {
         if (err) {
             console.error("Data laane mein gadbad hui:", err);
             return res.status(500).json({ error: "Database error" });
@@ -16,6 +17,7 @@ exports.getExpenses = (req, res) => {
 // Naya kharcha add karne ke liye API (POST)
 exports.createExpense = (req, res) => {
     const { title, amount, category, date } = req.body;
+    const userId = req.user.id;
     
     // Validation
     if (!title || !amount || !category || !date) {
@@ -25,8 +27,8 @@ exports.createExpense = (req, res) => {
         return res.status(400).json({ error: "Amount 0 se bada hona chahiye." });
     }
 
-    const sqlQuery = "INSERT INTO expenses (title, amount, category, date) VALUES (?, ?, ?, ?)";
-    db.query(sqlQuery, [title, amount, category, date], (err, results) => {
+    const sqlQuery = "INSERT INTO expenses (title, amount, category, date, user_id) VALUES (?, ?, ?, ?, ?)";
+    db.query(sqlQuery, [title, amount, category, date, userId], (err, results) => {
         if (err) {
             console.error("Kharcha save karne mein gadbad:", err);
             return res.status(500).json({ error: "Database error" });
@@ -38,6 +40,7 @@ exports.createExpense = (req, res) => {
 // Kharcha Update/Edit karne ke liye API (PUT)
 exports.updateExpense = (req, res) => {
     const expenseId = req.params.id;
+    const userId = req.user.id;
     const { title, amount, category, date } = req.body;
     
     if (!title || !amount || !category || !date) {
@@ -47,14 +50,14 @@ exports.updateExpense = (req, res) => {
         return res.status(400).json({ error: "Amount 0 se bada hona chahiye." });
     }
 
-    const sqlQuery = "UPDATE expenses SET title = ?, amount = ?, category = ?, date = ? WHERE id = ?";
-    db.query(sqlQuery, [title, amount, category, date, expenseId], (err, results) => {
+    const sqlQuery = "UPDATE expenses SET title = ?, amount = ?, category = ?, date = ? WHERE id = ? AND user_id = ?";
+    db.query(sqlQuery, [title, amount, category, date, expenseId, userId], (err, results) => {
         if (err) {
             console.error("Kharcha update karne mein gadbad:", err);
             return res.status(500).json({ error: "Database error" });
         }
         if (results.affectedRows === 0) {
-            return res.status(404).json({ error: "Kharcha nahi mila yar." });
+            return res.status(404).json({ error: "Kharcha nahi mila ya aapka nahi hai." });
         }
         res.json({ message: "Kharcha successfully update ho gaya! ✏️" });
     });
@@ -63,15 +66,16 @@ exports.updateExpense = (req, res) => {
 // Kharcha delete karne ke liye API (DELETE)
 exports.deleteExpense = (req, res) => {
     const expenseId = req.params.id;
+    const userId = req.user.id;
     
-    const sqlQuery = "DELETE FROM expenses WHERE id = ?";
-    db.query(sqlQuery, [expenseId], (err, results) => {
+    const sqlQuery = "DELETE FROM expenses WHERE id = ? AND user_id = ?";
+    db.query(sqlQuery, [expenseId, userId], (err, results) => {
         if (err) {
             console.error("Kharcha delete karne mein gadbad:", err);
             return res.status(500).json({ error: "Database error" });
         }
         if (results.affectedRows === 0) {
-            return res.status(404).json({ error: "Kharcha pehle se hi deleted hai ya fail hua." });
+            return res.status(404).json({ error: "Kharcha pehle se hi deleted hai ya aapka nahi hai." });
         }
         res.json({ message: "Kharcha hamesha ke liye delete ho gaya! 🗑️" });
     });

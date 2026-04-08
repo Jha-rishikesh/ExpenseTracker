@@ -40,9 +40,14 @@ const ExpenseForm = ({ onExpenseAdded, editData, setEditData }) => {
     const method = editData ? 'PUT' : 'POST';
     const url = editData ? `${apiUrl}/${editData.id}` : apiUrl;
 
+    const token = localStorage.getItem('token');
+
     fetch(url, {
       method: method,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify(expenseData)
     })
     .then(res => {
@@ -63,25 +68,35 @@ const ExpenseForm = ({ onExpenseAdded, editData, setEditData }) => {
     });
   };
 
-  const inputStyle = { padding: '12px', background: '#1e1e2f', color: '#fff', border: '1px solid #2b3553', borderRadius: '6px', outline: 'none', fontSize: '15px' };
+  const inputClass = "p-3 bg-[#1e1e2f] text-white border border-[#2b3553] rounded-md outline-none text-[15px] focus:border-[#e14eca] transition-colors w-full";
 
   return (
-    <div style={{ background: '#27293d', padding: '25px', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.2)' }}>
-      <h3 style={{ marginTop: 0, borderBottom: '1px solid #3b3d54', paddingBottom: '15px', color: '#e14eca', fontSize: '20px' }}>
+    <div className="bg-[#27293d] p-6 rounded-xl shadow-lg">
+      <h3 className="mt-0 border-b border-[#3b3d54] pb-4 text-[#e14eca] text-xl font-semibold">
         {editData ? '✏️ Kharcha Update Karein' : '➕ Naya Kharcha Jodein'}
       </h3>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '20px' }}>
-        <input type="text" placeholder="Kya kharida? (e.g. Pizza)" value={title} onChange={(e) => setTitle(e.target.value)} required style={inputStyle}/>
-        <input type="number" placeholder="Kitne ka? (e.g. 200)" value={amount} onChange={(e) => setAmount(e.target.value)} min="1" required style={inputStyle}/>
-        <input type="text" placeholder="Category (e.g. Food)" value={category} onChange={(e) => setCategory(e.target.value)} required style={inputStyle}/>
-        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required style={inputStyle}/>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-5">
+        <input type="text" placeholder="Kya kharida? (e.g. Pizza)" value={title} onChange={(e) => setTitle(e.target.value)} required className={inputClass} />
+        <input type="number" placeholder="Kitne ka? (e.g. 200)" value={amount} onChange={(e) => setAmount(e.target.value)} min="1" required className={inputClass} />
+        <input type="text" placeholder="Category (e.g. Food)" value={category} onChange={(e) => setCategory(e.target.value)} required className={inputClass} />
+        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required className={inputClass} />
         
-        <button type="submit" disabled={isLoading} style={{ padding: '14px', background: editData ? '#1d8cf8' : '#00f2c3', color: '#1e1e2f', border: 'none', borderRadius: '6px', cursor: isLoading ? 'not-allowed' : 'pointer', fontSize: '16px', fontWeight: 'bold', marginTop: '10px', transition: '0.3s', opacity: isLoading ? 0.7 : 1 }}>
+        <button 
+          type="submit" 
+          disabled={isLoading} 
+          className={`p-3.5 mt-2 rounded-md font-bold text-base transition-all duration-300 ${
+            editData ? 'bg-[#1d8cf8] text-white hover:bg-blue-600' : 'bg-[#00f2c3] text-[#1e1e2f] hover:bg-teal-400'
+          } ${isLoading ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`}
+        >
           {isLoading ? 'Wait...' : (editData ? '💾 Update Kharcha' : '➕ Add Kharcha')}
         </button>
         
         {editData && (
-           <button type="button" onClick={resetForm} style={{ padding: '12px', background: '#344675', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>
+           <button 
+            type="button" 
+            onClick={resetForm} 
+            className="p-3 bg-[#344675] text-white rounded-md hover:bg-slate-600 cursor-pointer transition-colors"
+           >
              ❌ Cancel
            </button>
         )}
